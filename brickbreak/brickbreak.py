@@ -51,7 +51,6 @@ fpsCounter = FPSCounter("Arial", 12, (5, 5), WHITE)
 
 while 1:
     clock.tick(144) # caps fps at 144
-    screen.fill(BLACK)
     
     fpsCounter.update(screen, clock)
 

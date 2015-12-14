@@ -8,6 +8,9 @@ class Entity(object):
     def __init__(self, pos):
         self.pos = pos
 
+    def get_rect(self):
+        return pygame.Rect(self.pos + self.size)
+
     @abc.abstractmethod
     def update():
         return
@@ -21,6 +24,8 @@ class FPSCounter(Entity):
 
     def draw(self, surface, clock):
         fps = self.font.render(str(int(clock.get_fps())), True, self.color)
+        size = fps.get_size()
+        pygame.draw.rect(surface, (0, 0, 0), self.pos + size)
         surface.blit(fps, self.pos)
 
     def update(self, surface, clock):
@@ -41,21 +46,21 @@ class Ball(Entity):
         self.check_paddle_collision(paddle)
         self.check_wall_collision(surface)
 
-    def draw(self, surface):
-        pygame.draw.circle(surface, self.color, (int(round(self.pos[0], 1)), int(round(self.pos[1], 1))), self.radius)
-        #pygame.draw.rect(screen, (255, 0, 0), self.get_rect(), 1) # hitbox
+    def draw(self, surface, color):
+        pygame.draw.circle(surface, color, (int(round(self.pos[0], 1)) + self.radius, int(round(self.pos[1], 1))+ self.radius), self.radius)
+        #pygame.draw.rect(surface, (255, 0, 0), self.get_rect(), 1) # hitbox
 
     def left(self):
-        return self.pos[0] - self.radius
+        return self.pos[0]
 
     def top(self):
-        return self.pos[1] - self.radius
+        return self.pos[1]
 
     def right(self):
-        return self.pos[0] + self.radius
+        return self.pos[0] + self.radius * 2
 
     def bottom(self):
-        return self.pos[1] + self.radius
+        return self.pos[1] + self.radius * 2
 
     def check_paddle_collision(self, paddle):
         if paddle.get_rect().colliderect(self.get_rect()):
@@ -71,8 +76,12 @@ class Ball(Entity):
         return pygame.Rect([self.left(), self.top(), self.radius * 2, self.radius * 2])
 
     def update(self, surface, paddle):
+        self.erase(surface)
         self.move(surface, paddle)
-        self.draw(surface)
+        self.draw(surface, self.color)
+
+    def erase(self, surface):
+        self.draw(surface, (0, 0, 0))
 
 
 class Paddle(Entity):
@@ -84,16 +93,17 @@ class Paddle(Entity):
     def move(self):
         self.pos[0] = pygame.mouse.get_pos()[0]
 
-    def draw(self, surface):
-        pygame.draw.rect(surface, self.color, self.get_rect())
+    def draw(self, surface, color):
+        pygame.draw.rect(surface, color, self.get_rect())
         #pygame.draw.rect(screen, (255, 0, 0), self.get_rect(), 1) # hitbox
 
-    def get_rect(self):
-        return pygame.Rect(self.pos + self.size)
-
     def update(self, surface):
+        self.erase(surface)
         self.move()
-        self.draw(surface)
+        self.draw(surface, self.color)
+
+    def erase(self, surface):
+        self.draw(surface, (0, 0, 0))
 
 
 class Brick(Entity):
@@ -102,14 +112,15 @@ class Brick(Entity):
         self.size = size
         self.color = color
         self.border_color = map(lambda x: x * 0.9, self.color)
+        self.hit = False
+        self.drawn = False
 
     def draw(self, surface):
-        pygame.draw.rect(surface, self.color, self.get_rect())
-        pygame.draw.rect(surface, self.border_color, self.get_rect(), 1)
-        #pygame.draw.rect(surface, (255, 0, 0), self.get_rect(), 1) # hitbox
-
-    def get_rect(self):
-        return pygame.Rect(self.pos + self.size)
+        if (not self.drawn or self.hit):
+            self.drawn = True
+            pygame.draw.rect(surface, self.color, self.get_rect())
+            pygame.draw.rect(surface, self.border_color, self.get_rect(), 1)
+            #pygame.draw.rect(surface, (255, 0, 0), self.get_rect(), 1) # hitbox
 
     def update(self, surface):
         self.draw(surface)
