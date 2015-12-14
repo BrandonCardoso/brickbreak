@@ -1,4 +1,4 @@
-import abc
+﻿import abc
 import pygame
 
 
@@ -85,7 +85,7 @@ class Paddle(Entity):
         self.pos[0] = pygame.mouse.get_pos()[0]
 
     def draw(self, surface):
-        pygame.draw.rect(surface, self.color, self.pos + self.size)
+        pygame.draw.rect(surface, self.color, self.get_rect())
         #pygame.draw.rect(screen, (255, 0, 0), self.get_rect(), 1) # hitbox
 
     def get_rect(self):
@@ -93,4 +93,23 @@ class Paddle(Entity):
 
     def update(self, surface):
         self.move()
+        self.draw(surface)
+
+
+class Brick(Entity):
+    def __init__(self, pos, size, color):
+        Entity.__init__(self, pos)
+        self.size = size
+        self.color = color
+        self.border_color = map(lambda x: x * 0.9, self.color)
+
+    def draw(self, surface):
+        pygame.draw.rect(surface, self.color, self.get_rect())
+        pygame.draw.rect(surface, self.border_color, self.get_rect(), 1)
+        #pygame.draw.rect(surface, (255, 0, 0), self.get_rect(), 1) # hitbox
+
+    def get_rect(self):
+        return pygame.Rect(self.pos + self.size)
+
+    def update(self, surface):
         self.draw(surface)
