@@ -39,12 +39,9 @@ class Ball(Entity):
         self.color = color
         self.radius = radius
 
-    def move(self, surface, paddle):
+    def move(self):
         self.pos[0] += self.velocity[0]
         self.pos[1] += self.velocity[1]
-
-        self.check_paddle_collision(paddle)
-        self.check_wall_collision(surface)
 
     def draw(self, surface, color):
         pygame.draw.circle(surface, color, (int(round(self.pos[0], 1)) + self.radius, int(round(self.pos[1], 1))+ self.radius), self.radius)
@@ -75,13 +72,26 @@ class Ball(Entity):
     def get_rect(self):
         return pygame.Rect([self.left(), self.top(), self.radius * 2, self.radius * 2])
 
-    def update(self, surface, paddle):
+    def update(self, surface, paddle, bricks):
         self.erase(surface)
-        self.move(surface, paddle)
+        self.check_paddle_collision(paddle)
+        self.check_wall_collision(surface)
+        self.check_brick_collision(bricks)
+        self.move()
         self.draw(surface, self.color)
 
     def erase(self, surface):
         self.draw(surface, (0, 0, 0))
+
+    def check_brick_collision(self, bricks):
+        for brick in bricks:
+            if not brick.hit and self.get_rect().colliderect(brick.get_rect()):
+                print('hit!')
+                print(self.pos)
+                print(brick.pos)
+                # TODO: bounce ball in right direction
+                brick.was_hit()
+                break
 
 
 class Paddle(Entity):
@@ -113,14 +123,27 @@ class Brick(Entity):
         self.color = color
         self.border_color = map(lambda x: x * 0.9, self.color)
         self.hit = False
-        self.drawn = False
+        self.need_update = True
+        self.remove = False
+
+    def was_hit(self):
+        self.hit = True
+        self.need_update = True
+
+    def erase(self, surface):
+        pygame.draw.rect(surface, (0,0,0), self.get_rect())
 
     def draw(self, surface):
-        if (not self.drawn or self.hit):
-            self.drawn = True
-            pygame.draw.rect(surface, self.color, self.get_rect())
-            pygame.draw.rect(surface, self.border_color, self.get_rect(), 1)
-            #pygame.draw.rect(surface, (255, 0, 0), self.get_rect(), 1) # hitbox
+        pygame.draw.rect(surface, self.color, self.get_rect())
+        pygame.draw.rect(surface, self.border_color, self.get_rect(), 1)
+        #pygame.draw.rect(surface, (255, 0, 0), self.get_rect(), 1) # hitbox
 
     def update(self, surface):
-        self.draw(surface)
+        if self.need_update:
+            if self.hit:
+                self.erase(surface)
+                self.remove = True
+            else:
+                self.draw(surface)
+
+        self.need_update = False

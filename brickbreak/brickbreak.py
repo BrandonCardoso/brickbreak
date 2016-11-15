@@ -51,7 +51,7 @@ fpsCounter = FPSCounter("Arial", 12, (5, 5), WHITE)
 
 while 1:
     clock.tick(144) # caps fps at 144
-    
+
     fpsCounter.update(screen, clock)
 
     for event in pygame.event.get():
@@ -62,7 +62,9 @@ while 1:
     for brick in bricks:
         brick.update(screen)
 
-    ball.update(screen, paddle)
+    ball.update(screen, paddle, bricks)
+
+    bricks = filter(lambda x: not x.remove, bricks) # remove hit bricks
 
     pygame.display.flip()
 
