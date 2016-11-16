@@ -69,30 +69,49 @@ class Ball(Entity):
         if self.top() < 0 or self.bottom() > screen.get_height():
             self.velocity[1] *= -1
 
+    def check_brick_collisions(self, bricks):
+        for brick in bricks:
+            if not brick.hit:
+                point = self.check_brick_collision(brick)
+                if point:
+                    brick.was_hit()
+                    self.bounce(point)
+                    return
+
+    def check_brick_collision(self, brick):
+        closest_x = max(brick.get_rect().left, min(self.left() + self.radius, brick.get_rect().right))
+        closest_y = max(brick.get_rect().top, min(self.top() + self.radius, brick.get_rect().bottom))
+
+        dist_x = self.left() + self.radius - closest_x
+        dist_y = self.top() + self.radius - closest_y
+
+        if ((dist_x ** 2) + (dist_y ** 2)) < self.radius**2:
+            return (closest_x, closest_y)
+        else:
+            return None
+
     def get_rect(self):
         return pygame.Rect([self.left(), self.top(), self.radius * 2, self.radius * 2])
 
     def update(self, surface, paddle, bricks):
-        self.erase(surface)
         self.check_paddle_collision(paddle)
         self.check_wall_collision(surface)
-        self.check_brick_collision(bricks)
+        self.check_brick_collisions(bricks)
+        self.erase(surface)
         self.move()
         self.draw(surface, self.color)
 
     def erase(self, surface):
         self.draw(surface, (0, 0, 0))
 
-    def check_brick_collision(self, bricks):
-        for brick in bricks:
-            if not brick.hit and self.get_rect().colliderect(brick.get_rect()):
-                print('hit!')
-                print(self.pos)
-                print(brick.pos)
-                # TODO: bounce ball in right direction
-                brick.was_hit()
-                break
+    def bounce(self, point):
+        middle_x = self.left() + self.radius
+        middle_y = self.top() + self.radius
 
+        if middle_x == point[0]:
+            self.velocity[1] *= -1
+        elif middle_y == point[1]:
+            self.velocity[0] *= -1
 
 class Paddle(Entity):
     def __init__(self, pos, size, color):
