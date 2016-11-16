@@ -42,8 +42,9 @@ screen = pygame.display.set_mode(windowSize)
 
 clock = pygame.time.Clock()
 
-ball = Ball([screen.get_width()/2, screen.get_height()/2], [1, 1.5], WHITE, 5)
-paddle = Paddle([0, 550], [40, 8], WHITE)
+ball_radius = 5
+ball = Ball([screen.get_width()/2 - ball_radius/2, screen.get_height()/2 - ball_radius/2], [0, 3], WHITE, ball_radius)
+paddle = Paddle([0, 550], [60, 8], WHITE)
 
 bricks = generate_bricks([40, 40], 10, 30, screen.get_width() - 80, 200)
 

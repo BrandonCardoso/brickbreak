@@ -1,6 +1,8 @@
 ﻿import abc
 import pygame
 
+def clamp(n, minimum, maximum):
+    return max(minimum, min(n, maximum))
 
 class Entity(object):
     __metaclass__ = abc.ABCMeta
@@ -14,7 +16,6 @@ class Entity(object):
     @abc.abstractmethod
     def update():
         return
-
 
 class FPSCounter(Entity):
     def __init__(self, fontFace, fontSize, pos, color):
@@ -38,6 +39,7 @@ class Ball(Entity):
         self.velocity = velocity
         self.color = color
         self.radius = radius
+        self.max_speed = 5
 
     def move(self):
         self.pos[0] += self.velocity[0]
@@ -62,6 +64,7 @@ class Ball(Entity):
     def check_paddle_collision(self, paddle):
         if paddle.get_rect().colliderect(self.get_rect()):
             self.velocity[1] *= -1
+            self.velocity[0] = clamp(self.velocity[0] + paddle.velocity_x * paddle.friction, -1 * self.max_speed, self.max_speed)
 
     def check_wall_collision(self, screen):
         if self.left() < 0 or self.right() > screen.get_width():
@@ -118,9 +121,13 @@ class Paddle(Entity):
         Entity.__init__(self, pos)
         self.size = size
         self.color = color
+        self.velocity_x = 0
+        self.friction = 0.2
 
     def move(self):
+        old_x = self.pos[0]
         self.pos[0] = pygame.mouse.get_pos()[0]
+        self.velocity_x = self.pos[0] - old_x
 
     def draw(self, surface, color):
         pygame.draw.rect(surface, color, self.get_rect())
