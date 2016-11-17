@@ -12,7 +12,7 @@ class Entity(object):
         self.pos = pos
 
     def get_rect(self):
-        return pygame.Rect(self.pos + self.size)
+        return pygame.Rect(self.pos, self.size)
 
     @abc.abstractmethod
     def update():
@@ -39,7 +39,7 @@ class Ball(Entity):
         self.velocity = velocity
         self.color = color
         self.radius = radius
-        self.max_speed = 5
+        self.max_speed = 3
 
     def move(self):
         self.pos[0] += self.velocity[0]
@@ -61,6 +61,9 @@ class Ball(Entity):
     def bottom(self):
         return self.pos[1] + self.radius * 2
 
+    def center(self):
+        return (self.pos[0] + self.radius, self.pos[1] + self.radius)
+
     def check_paddle_collision(self, paddle):
         if paddle.get_rect().colliderect(self.get_rect()):
             self.velocity[1] *= -1
@@ -75,10 +78,10 @@ class Ball(Entity):
     def check_brick_collisions(self, bricks):
         for brick in bricks:
             if not brick.hit:
-                point = self.check_brick_collision(brick)
-                if point:
+                collision_point = self.check_brick_collision(brick)
+                if collision_point:
                     brick.was_hit()
-                    self.bounce(point)
+                    self.bounce(collision_point)
                     return
 
     def check_brick_collision(self, brick):
@@ -94,7 +97,7 @@ class Ball(Entity):
             return None
 
     def get_rect(self):
-        return pygame.Rect([self.left(), self.top(), self.radius * 2, self.radius * 2])
+        return pygame.Rect(self.pos, (self.radius * 2, self.radius * 2))
 
     def update(self, surface, paddle, bricks):
         self.check_paddle_collision(paddle)
@@ -171,7 +174,7 @@ class Brick(Entity):
             else:
                 self.draw(surface)
 
-        self.need_update = False
+            self.need_update = False
 
 class BrickGrid():
     def __init__(self, pos, rows, cols, width, height):
@@ -196,3 +199,6 @@ class BrickGrid():
 
         for brick in self.bricks:
             brick.update(surface)
+
+    def get_bricks(self):
+        return self.bricks
