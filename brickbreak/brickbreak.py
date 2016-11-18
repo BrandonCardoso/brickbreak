@@ -10,7 +10,7 @@ pygame.display.set_caption("Brick Break")
 pygame.mouse.set_visible(False)
 
 windowSize = width, height = 800, 600
-screen = pygame.display.set_mode(windowSize)
+screen = pygame.display.set_mode(windowSize, pygame.DOUBLEBUF)
 
 clock = pygame.time.Clock()
 
