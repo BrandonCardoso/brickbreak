@@ -32,6 +32,9 @@
     <Compile Include="src\spatial.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="src\state.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="src\__init__.py">
       <SubType>Code</SubType>
     </Compile>
