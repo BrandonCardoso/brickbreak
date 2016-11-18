@@ -1,6 +1,7 @@
 ﻿import abc
 import pygame
 import random
+from src.misc import Colors
 
 def clamp(n, minimum, maximum):
     return max(minimum, min(n, maximum))
@@ -178,21 +179,12 @@ class Brick(Entity):
 
 class BrickGrid():
     def __init__(self, pos, rows, cols, width, height):
-        self.brick_colors = {
-            0: (119, 158, 203), #BLUE
-            1: (119, 190, 119), #GREEN
-            2: (255, 179, 71),  #ORANGE
-            3: (150, 111, 214), #PURPLE
-            4: (253, 253, 150), #YELLOW
-            5: (255, 120, 120), #RED
-        }
-        self.num_brick_colors = len(self.brick_colors)
         self.bricks = []
         for i in range(0, rows):
             for j in range(0, cols):            
                 self.bricks.append(Brick([j * width / cols + pos[1], i * height / rows + pos[0]],
                     [width / cols, height / rows],
-                    self.brick_colors[random.randint(0, self.num_brick_colors - 1)]))
+                    Colors.WHITE))
 
     def update(self, surface):
         self.bricks = filter(lambda x: not x.remove, self.bricks) # remove hit bricks

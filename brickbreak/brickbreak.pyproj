@@ -26,6 +26,9 @@
     <Compile Include="src\entities.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="src\misc.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="src\spatial.py">
       <SubType>Code</SubType>
     </Compile>
