@@ -164,8 +164,9 @@ class Brick(Entity):
         pygame.draw.rect(surface, self.border_color, self.get_rect(), 1)
         #pygame.draw.rect(surface, (255, 0, 0), self.get_rect(), 1) # hitbox
 
-    def update(self, surface):
-        if self.need_update:
+    def update(self, surface, force_redraw = False):
+
+        if self.need_update or force_redraw:
             if self.hit:
                 self.erase(surface)
                 self.remove = True
@@ -183,11 +184,11 @@ class BrickGrid():
                     [width / cols, height / rows],
                     Colors.WHITE))
 
-    def update(self, surface):
+    def update(self, surface, force_redraw = False):
         self.bricks = filter(lambda x: not x.remove, self.bricks) # remove hit bricks
 
         for brick in self.bricks:
-            brick.update(surface)
+            brick.update(surface, force_redraw)
 
     def get_bricks(self):
         return self.bricks

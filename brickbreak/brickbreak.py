@@ -38,6 +38,9 @@ paused_text_size = paused_text_render.get_size()
 paused_text_pos = (width/2 - paused_text_size[0]/2, height/2 - paused_text_size[1])
 
 
+def clear_screen():
+    screen.fill((0,0,0))
+
 def run_title_screen():
     screen.blit(title_text_render, title_text_pos)
 
@@ -52,6 +55,8 @@ def run_game():
 def run_pause_screen():
     screen.blit(paused_text_render, paused_text_pos)
 
+def redraw_bricks():
+    brick_grid.update(screen, True)
 
 ### state
 game_state_manager = GameStateManager(GameState.TITLE)
@@ -59,6 +64,11 @@ game_state_manager.add_relation(GameStateRelation("Exit Title Screen", GameState
 game_state_manager.add_relation(GameStateRelation("Pause Game", GameState.INGAME, GameState.PAUSED, pygame.K_p))
 game_state_manager.add_relation(GameStateRelation("Unpause Game", GameState.PAUSED, GameState.INGAME, pygame.K_ESCAPE))
 game_state_manager.add_relation(GameStateRelation("Unpause Game", GameState.PAUSED, GameState.INGAME, pygame.K_p))
+
+game_state_manager.add_enter_callback(GameState.INGAME, redraw_bricks)
+
+game_state_manager.add_exit_callback(GameState.TITLE, clear_screen)
+game_state_manager.add_exit_callback(GameState.PAUSED, clear_screen)
 
 ### event handlers
 def handle_event(event):
@@ -70,10 +80,10 @@ def handle_event(event):
 while True:
     clock.tick(144) # caps fps at 144
 
-    game_state = game_state_manager.get_state()
-
     for event in pygame.event.get():
         handle_event(event)
+
+    game_state = game_state_manager.get_state()
 
     if game_state == GameState.TITLE:
         run_title_screen()
