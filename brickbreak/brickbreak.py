@@ -22,8 +22,14 @@ title_text_render = title_font.render(title_text, True, Colors.RED)
 title_text_size = title_text_render.get_size()
 title_text_pos = (width/2 - title_text_size[0]/2, height/2 - title_text_size[1]/2)
 
+exit_title_text = "Press any key to start"
+exit_title_font = pygame.font.SysFont("Consolas", 12)
+exit_title_text_render = exit_title_font.render(exit_title_text, False, Colors.WHITE)
+exit_title_text_size = exit_title_text_render.get_size()
+exit_title_text_pos = (width/2 - exit_title_text_size[0]/2, height/2 - exit_title_text_size[1]/2 + title_text_size[1] * 2)
+
 ### game objects
-fpsCounter = FPSCounter("Arial", 12, (5, 5), Colors.WHITE)
+fpsCounter = FPSCounter("Consolas", 12, (5, 5), Colors.WHITE)
 ball_radius = 5
 ball = Ball([screen.get_width()/2 - ball_radius/2, screen.get_height()/2 - ball_radius/2], [0, 2], Colors.WHITE, ball_radius)
 paddle = Paddle([0, 550], [60, 8], Colors.WHITE)
@@ -43,6 +49,7 @@ def clear_screen():
 
 def run_title_screen():
     screen.blit(title_text_render, title_text_pos)
+    screen.blit(exit_title_text_render, exit_title_text_pos)
 
 def run_game():
     fpsCounter.update(screen, clock)
@@ -62,8 +69,9 @@ def redraw_bricks():
 game_state_manager = GameStateManager(GameState.TITLE)
 game_state_manager.add_relation(GameStateRelation("Exit Title Screen", GameState.TITLE, GameState.INGAME))
 game_state_manager.add_relation(GameStateRelation("Pause Game", GameState.INGAME, GameState.PAUSED, pygame.K_p))
-game_state_manager.add_relation(GameStateRelation("Unpause Game", GameState.PAUSED, GameState.INGAME, pygame.K_ESCAPE))
+game_state_manager.add_relation(GameStateRelation("Pause Game", GameState.INGAME, GameState.PAUSED, pygame.K_SPACE))
 game_state_manager.add_relation(GameStateRelation("Unpause Game", GameState.PAUSED, GameState.INGAME, pygame.K_p))
+game_state_manager.add_relation(GameStateRelation("Unpause Game", GameState.PAUSED, GameState.INGAME, pygame.K_SPACE))
 
 game_state_manager.add_enter_callback(GameState.INGAME, redraw_bricks)
 
