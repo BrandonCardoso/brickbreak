@@ -1,3 +1,6 @@
+def clamp(n, minimum, maximum):
+    return max(minimum, min(n, maximum))
+
 class Colors():
     BLACK = (0, 0, 0)
     WHITE = (255, 255, 255)

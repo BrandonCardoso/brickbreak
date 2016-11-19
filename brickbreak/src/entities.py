@@ -1,10 +1,7 @@
 ﻿import abc
 import pygame
 import random
-from src.misc import Colors
-
-def clamp(n, minimum, maximum):
-    return max(minimum, min(n, maximum))
+from src.misc import clamp, Colors
 
 class Entity(object):
     __metaclass__ = abc.ABCMeta
