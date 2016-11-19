@@ -127,7 +127,7 @@ class Paddle(Entity):
 
     def move(self):
         old_x = self.pos[0]
-        self.pos[0] = pygame.mouse.get_pos()[0]
+        self.pos[0] = pygame.mouse.get_pos()[0] - self.size[0] / 2
         self.velocity_x = self.pos[0] - old_x
 
     def draw(self, surface, color):
