@@ -26,6 +26,9 @@
     <Compile Include="src\entities.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="src\geometry\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="src\misc.py">
       <SubType>Code</SubType>
     </Compile>
@@ -41,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="src\" />
+    <Folder Include="src\geometry\" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

@@ -1,7 +1,8 @@
 ﻿import abc
 import pygame
 import random
-from src.misc import clamp, Colors
+import src.geometry as geometry
+from src.misc import Colors, clamp
 
 class Entity(object):
     __metaclass__ = abc.ABCMeta
@@ -62,10 +63,22 @@ class Ball(Entity):
     def center(self):
         return (self.pos[0] + self.radius, self.pos[1] + self.radius)
 
+    def get_collision_point(self, rect):
+        nearest_point = geometry.nearest_point_on_rect(self.center(), rect)
+        dist = geometry.dist(self.center(), nearest_point)
+
+        if (dist[0] ** 2) + (dist[1] ** 2) < self.radius**2:
+            return nearest_point
+        else:
+            return None
+
     def check_paddle_collision(self, paddle):
-        if paddle.get_rect().colliderect(self.get_rect()):
-            self.velocity[1] *= -1
-            self.velocity[0] = clamp(self.velocity[0] + paddle.velocity_x * paddle.friction, -1 * self.max_speed, self.max_speed)
+        point = self.get_collision_point(paddle.get_rect())
+
+        if point:
+            self.velocity[0] = clamp(self.velocity[0] + paddle.velocity_x * paddle.friction,
+                                     -1 * self.max_speed, self.max_speed)
+            self.bounce(point)
 
     def check_wall_collision(self, screen):
         if self.left() < 0 or self.right() > screen.get_width():
@@ -83,16 +96,7 @@ class Ball(Entity):
                     return
 
     def check_brick_collision(self, brick):
-        closest_x = max(brick.get_rect().left, min(self.left() + self.radius, brick.get_rect().right))
-        closest_y = max(brick.get_rect().top, min(self.top() + self.radius, brick.get_rect().bottom))
-
-        dist_x = self.left() + self.radius - closest_x
-        dist_y = self.top() + self.radius - closest_y
-
-        if ((dist_x ** 2) + (dist_y ** 2)) < self.radius**2:
-            return (closest_x, closest_y)
-        else:
-            return None
+        return self.get_collision_point(brick.get_rect())
 
     def get_rect(self):
         return pygame.Rect(self.pos, (self.radius * 2, self.radius * 2))
