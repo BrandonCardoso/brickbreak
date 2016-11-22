@@ -2,7 +2,7 @@
 import sys
 from src.entities import Ball, Paddle, FPSCounter, Brick, BrickGrid
 from src.spatial import SpatialHash
-from src.misc import Colors
+from src.misc import Colors, ScreenText
 from src.state import GameState, GameStateRelation, GameStateManager
 
 pygame.init()
@@ -16,17 +16,8 @@ screen = pygame.display.set_mode(windowSize, pygame.DOUBLEBUF)
 clock = pygame.time.Clock()
 
 ### title screen objects
-title_text = "BRICK BREAK"
-title_font = pygame.font.SysFont("Consolas", 48)
-title_text_render = title_font.render(title_text, True, Colors.RED)
-title_text_size = title_text_render.get_size()
-title_text_pos = (width/2 - title_text_size[0]/2, height/2 - title_text_size[1]/2)
-
-exit_title_text = "Press any key to start"
-exit_title_font = pygame.font.SysFont("Consolas", 12)
-exit_title_text_render = exit_title_font.render(exit_title_text, False, Colors.WHITE)
-exit_title_text_size = exit_title_text_render.get_size()
-exit_title_text_pos = (width/2 - exit_title_text_size[0]/2, height/2 - exit_title_text_size[1]/2 + title_text_size[1] * 2)
+title_text = ScreenText("BRICK BREAK", "Consolas", 48, (width/2, height/2), Colors.RED)
+exit_title_text = ScreenText("Press any key to start", "Consolas", 12, (width/2, height/2 + 100), Colors.WHITE, Colors.NONE, False)
 
 ### game objects
 fpsCounter = FPSCounter("Consolas", 12, (5, 5), Colors.WHITE)
@@ -37,19 +28,15 @@ brick_grid = BrickGrid([40, 40], 10, 30, screen.get_width() - 80, 200)
 brick_hash = SpatialHash(width, height, 10, 10, brick_grid.get_bricks())
 
 ### pause screen objects
-paused_text = "PAUSED"
-paused_font = pygame.font.SysFont("Consolas", 32)
-paused_text_render = paused_font.render(paused_text, True, Colors.BLACK, Colors.WHITE)
-paused_text_size = paused_text_render.get_size()
-paused_text_pos = (width/2 - paused_text_size[0]/2, height/2 - paused_text_size[1])
+paused_text = ScreenText("PAUSED", "Consolas", 32, (width/2, height/2), Colors.BLACK, Colors.WHITE)
 
 
 def clear_screen():
     screen.fill((0,0,0))
 
 def run_title_screen():
-    screen.blit(title_text_render, title_text_pos)
-    screen.blit(exit_title_text_render, exit_title_text_pos)
+    title_text.draw(screen)
+    exit_title_text.draw(screen)
 
 def run_game():
     fpsCounter.update(screen, clock)
@@ -60,7 +47,7 @@ def run_game():
     ball.update(screen, paddle, bricks_near_ball)
 
 def run_pause_screen():
-    screen.blit(paused_text_render, paused_text_pos)
+    paused_text.draw(screen)
 
 def redraw_bricks():
     brick_grid.update(screen, True)
