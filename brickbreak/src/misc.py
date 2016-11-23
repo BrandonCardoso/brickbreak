@@ -16,10 +16,28 @@ class Colors():
 
 
 class ScreenText():
-    def __init__(self, text, font_face, font_size, center_pos, color = Colors.WHITE, background = Colors.NONE, antialias = True):
+    def __init__(self, text, font_face, font_size, pos, centered, color = Colors.WHITE, background = Colors.NONE, antialias = True):
         self.render = pygame.font.SysFont(font_face, font_size).render(text, antialias, color, background)
-        self.size = self.render.get_size()
-        self.pos = (center_pos[0] - self.size[0]/2, center_pos[1] - self.size[1]/2)
+        self.size = self.render.get_size()
+        self.font_face = font_face
+        self.font_size = font_size
+        self.color = color
+        self.background = background
+        self.antialias = antialias
+        if centered:
+            self.pos = (pos[0] - self.size[0]/2, pos[1] - self.size[1]/2)
+        else:
+            self.pos = pos
+
+        self.rect = pygame.Rect(self.pos, self.size)
+
+    def set_text(self, text):
+        self.render = pygame.font.SysFont(self.font_face, self.font_size).render(text, self.antialias, self.color, self.background)
+        self.size = self.render.get_size()
+        self.rect = pygame.Rect(self.pos, self.size)
 
     def draw(self, surface):
         surface.blit(self.render, self.pos)
+
+    def get_rect(self):
+        return self.rect
