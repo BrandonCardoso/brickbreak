@@ -35,7 +35,6 @@ paused_text = ScreenText("PAUSED", "Consolas", 32, (width/2, height/2), True, Co
 
 
 def clear_screen():
-    global dirty_rects
     screen.fill((0,0,0))
     dirty_rects.append(pygame.Rect(0, 0, width, height))
 
@@ -47,8 +46,6 @@ def run_title_screen():
                         exit_title_text.get_rect()])
 
 def run_game():
-    global dirty_rects
-
     lives_text.draw(screen)
     dirty_rects.append(lives_text.get_rect())
 
@@ -63,14 +60,13 @@ def run_game():
     dirty_rects.extend([paddle.get_rect(), ball.get_rect()])
     dirty_rects.extend(brick_grid.get_dirty())
 
-    if ball.get_rect().top > paddle.get_rect().bottom:
+    if ball.get_rect().bottom >= height:
         global lives
         lives -= 1
         lives_text.set_text("Lives: " + str(lives))
         ball.reset()
 
 def run_pause_screen():
-    global dirty_rects
     paused_text.draw(screen)
     dirty_rects.append(paused_text.get_rect())
 

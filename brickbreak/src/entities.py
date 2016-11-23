@@ -21,6 +21,7 @@ class Ball(Entity):
     def __init__(self, pos, velocity, color, radius):
         Entity.__init__(self, pos)
         self.velocity = velocity
+        self.initial_velocity = velocity
         self.color = color
         self.radius = radius
         self.max_speed = 3
@@ -32,6 +33,7 @@ class Ball(Entity):
 
     def reset(self):
         self.launched = False
+        self.velocity = self.initial_velocity
 
     def move(self):
         self.pos[0] += self.velocity[0]
