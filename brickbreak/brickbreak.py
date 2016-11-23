@@ -23,7 +23,7 @@ def reset_game():
     global ball, paddle, brick_grid, brick_hash, lives, lives_text
     ball = Ball([screen.get_width()/2 - ball_radius/2, screen.get_height()/2 - ball_radius/2], [0, -2], Colors.WHITE, ball_radius)
     paddle = Paddle([0, 550], [60, 8], Colors.WHITE)
-    brick_grid = BrickGrid([40, 40], 10, 30, screen.get_width() - 80, 200)
+    brick_grid = BrickGrid([40, 40], 8, 20, screen.get_width() - 80, 200)
     brick_hash = SpatialHash(width, height, 10, 10, brick_grid.get_bricks())
     lives = 3
     lives_text = ScreenText("Lives: " + str(lives), "Consolas", 12, (5, height - 12 - 5), False, Colors.WHITE, Colors.NONE, False)
@@ -45,6 +45,9 @@ paused_text = ScreenText("PAUSED", "Consolas", 32, (width/2, height/2), True, Co
 game_over_text = ScreenText("GAME OVER", "Consolas", 48, (width/2, height/2), True, Colors.RED)
 reset_text = ScreenText("Press any key to restart", "Consolas", 12, (width/2, height/2 + 100), True, Colors.WHITE, Colors.NONE, False)
 
+### cleared/victory screen objects
+victory_text = ScreenText("CLEARED", "Consolas", 48, (width/2, height/2), True, Colors.BLUE)
+# reset_tex
 
 def run_title_screen():
     global dirty_rects
@@ -76,6 +79,9 @@ def run_game():
         if lives <= 0:
             game_state_manager.set_state(GameState.GAMEOVER)
 
+    if len(brick_grid.get_bricks()) <= 0:
+        game_state_manager.set_state(GameState.CLEARED)
+
 def run_pause_screen():
     paused_text.draw(screen)
     dirty_rects.append(paused_text.get_rect())
@@ -84,6 +90,12 @@ def run_game_over_screen():
     game_over_text.draw(screen)
     reset_text.draw(screen)
     dirty_rects.extend([game_over_text.get_rect(),
+                        reset_text.get_rect()])
+
+def run_victory_screen():
+    victory_text.draw(screen)
+    reset_text.draw(screen)
+    dirty_rects.extend([victory_text.get_rect(),
                         reset_text.get_rect()])
 
 def redraw_bricks():
@@ -97,12 +109,14 @@ game_state_manager.add_relation(GameStateRelation("Pause Game", GameState.INGAME
 game_state_manager.add_relation(GameStateRelation("Unpause Game", GameState.PAUSED, GameState.INGAME, pygame.K_p))
 game_state_manager.add_relation(GameStateRelation("Unpause Game", GameState.PAUSED, GameState.INGAME, pygame.K_SPACE))
 game_state_manager.add_relation(GameStateRelation("Restart Game", GameState.GAMEOVER, GameState.INGAME))
+game_state_manager.add_relation(GameStateRelation("Restart Game", GameState.CLEARED, GameState.INGAME))
 
 game_state_manager.add_enter_callback(GameState.INGAME, redraw_bricks)
 
 game_state_manager.add_exit_callback(GameState.TITLE, clear_screen)
 game_state_manager.add_exit_callback(GameState.PAUSED, clear_screen)
 game_state_manager.add_exit_callback(GameState.GAMEOVER, reset_game)
+game_state_manager.add_exit_callback(GameState.CLEARED, reset_game)
 
 ### event handlers
 def handle_event(event):
@@ -137,6 +151,8 @@ while True:
         run_pause_screen()
     elif game_state == GameState.GAMEOVER:
         run_game_over_screen()
+    elif game_state == GameState.CLEARED:
+        run_victory_screen()
 
     if len(dirty_rects) > 0:
         pygame.display.update(dirty_rects)
