@@ -2,6 +2,7 @@ class GameState():
     TITLE = 0
     INGAME = 1
     PAUSED = 2
+    GAMEOVER = 3
 
 class GameStateRelation():
     def __init__(self, name, initial_state, end_state, key = None, mod = None):
@@ -21,8 +22,10 @@ class GameStateManager():
     def get_state(self):
         return self.state
 
-    def set_state(self, state):
-        self.state = state
+    def set_state(self, to_state, from_state = None):
+        self.on_exit(from_state if from_state else self.state)
+        self.state = to_state
+        self.on_enter(to_state)
 
     def _add_to_list(self, list, state, obj):
         if not state in list:
@@ -68,6 +71,4 @@ class GameStateManager():
         current_state = self.get_state()
         for relation in self.relations[current_state]:
             if (not relation.key or key == relation.key) and (not relation.mod or mod == relation.mod):
-                self.set_state(relation.end_state)
-                self.on_exit(current_state)
-                self.on_enter(relation.end_state)
+                self.set_state(relation.end_state, relation.initial_state)

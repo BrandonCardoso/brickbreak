@@ -6,7 +6,6 @@ from src.misc import Colors, ScreenText
 from src.state import GameState, GameStateRelation, GameStateManager
 
 pygame.init()
-
 pygame.display.set_caption("Brick Break")
 pygame.mouse.set_visible(False)
 
@@ -16,6 +15,20 @@ dirty_rects = []
 
 clock = pygame.time.Clock()
 
+def clear_screen():
+    screen.fill((0,0,0))
+    dirty_rects.append(pygame.Rect(0, 0, width, height))
+
+def reset_game():
+    global ball, paddle, brick_grid, brick_hash, lives, lives_text
+    ball = Ball([screen.get_width()/2 - ball_radius/2, screen.get_height()/2 - ball_radius/2], [0, 2], Colors.WHITE, ball_radius)
+    paddle = Paddle([0, 550], [60, 8], Colors.WHITE)
+    brick_grid = BrickGrid([40, 40], 10, 30, screen.get_width() - 80, 200)
+    brick_hash = SpatialHash(width, height, 10, 10, brick_grid.get_bricks())
+    lives = 3
+    lives_text = ScreenText("Lives: " + str(lives), "Consolas", 12, (5, height - 12 - 5), False, Colors.WHITE, Colors.NONE, False)
+    clear_screen()
+
 ### title screen objects
 title_text = ScreenText("BRICK BREAK", "Consolas", 48, (width/2, height/2), True, Colors.RED)
 exit_title_text = ScreenText("Press any key to start", "Consolas", 12, (width/2, height/2 + 100), True, Colors.WHITE, Colors.NONE, False)
@@ -23,20 +36,15 @@ exit_title_text = ScreenText("Press any key to start", "Consolas", 12, (width/2,
 ### game objects
 fps_counter = ScreenText(0, "Consolas", 12, (5, 5), False, Colors.WHITE, Colors.NONE, False)
 ball_radius = 5
-ball = Ball([screen.get_width()/2 - ball_radius/2, screen.get_height()/2 - ball_radius/2], [0, 2], Colors.WHITE, ball_radius)
-paddle = Paddle([0, 550], [60, 8], Colors.WHITE)
-brick_grid = BrickGrid([40, 40], 10, 30, screen.get_width() - 80, 200)
-brick_hash = SpatialHash(width, height, 10, 10, brick_grid.get_bricks())
-lives = 3
-lives_text = ScreenText("Lives: " + str(lives), "Consolas", 12, (5, height - 12 - 5), False, Colors.WHITE, Colors.NONE, False)
+reset_game()
 
 ### pause screen objects
 paused_text = ScreenText("PAUSED", "Consolas", 32, (width/2, height/2), True, Colors.BLACK, Colors.WHITE)
 
+### game over objects
+game_over_text = ScreenText("GAME OVER", "Consolas", 48, (width/2, height/2), True, Colors.RED)
+reset_text = ScreenText("Press any key to restart", "Consolas", 12, (width/2, height/2 + 100), True, Colors.WHITE, Colors.NONE, False)
 
-def clear_screen():
-    screen.fill((0,0,0))
-    dirty_rects.append(pygame.Rect(0, 0, width, height))
 
 def run_title_screen():
     global dirty_rects
@@ -65,10 +73,18 @@ def run_game():
         lives -= 1
         lives_text.set_text("Lives: " + str(lives))
         ball.reset()
+        if lives <= 0:
+            game_state_manager.set_state(GameState.GAMEOVER)
 
 def run_pause_screen():
     paused_text.draw(screen)
     dirty_rects.append(paused_text.get_rect())
+
+def run_game_over_screen():
+    game_over_text.draw(screen)
+    reset_text.draw(screen)
+    dirty_rects.extend([game_over_text.get_rect(),
+                        reset_text.get_rect()])
 
 def redraw_bricks():
     brick_grid.update(screen, True)
@@ -80,11 +96,13 @@ game_state_manager.add_relation(GameStateRelation("Pause Game", GameState.INGAME
 game_state_manager.add_relation(GameStateRelation("Pause Game", GameState.INGAME, GameState.PAUSED, pygame.K_SPACE))
 game_state_manager.add_relation(GameStateRelation("Unpause Game", GameState.PAUSED, GameState.INGAME, pygame.K_p))
 game_state_manager.add_relation(GameStateRelation("Unpause Game", GameState.PAUSED, GameState.INGAME, pygame.K_SPACE))
+game_state_manager.add_relation(GameStateRelation("Restart Game", GameState.GAMEOVER, GameState.INGAME))
 
 game_state_manager.add_enter_callback(GameState.INGAME, redraw_bricks)
 
 game_state_manager.add_exit_callback(GameState.TITLE, clear_screen)
 game_state_manager.add_exit_callback(GameState.PAUSED, clear_screen)
+game_state_manager.add_exit_callback(GameState.GAMEOVER, reset_game)
 
 ### event handlers
 def handle_event(event):
@@ -117,6 +135,8 @@ while True:
         run_game()
     elif game_state == GameState.PAUSED:
         run_pause_screen()
+    elif game_state == GameState.GAMEOVER:
+        run_game_over_screen()
 
     if len(dirty_rects) > 0:
         pygame.display.update(dirty_rects)
