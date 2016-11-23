@@ -21,7 +21,7 @@ def clear_screen():
 
 def reset_game():
     global ball, paddle, brick_grid, brick_hash, lives, lives_text
-    ball = Ball([screen.get_width()/2 - ball_radius/2, screen.get_height()/2 - ball_radius/2], [0, 2], Colors.WHITE, ball_radius)
+    ball = Ball([screen.get_width()/2 - ball_radius/2, screen.get_height()/2 - ball_radius/2], [0, -2], Colors.WHITE, ball_radius)
     paddle = Paddle([0, 550], [60, 8], Colors.WHITE)
     brick_grid = BrickGrid([40, 40], 10, 30, screen.get_width() - 80, 200)
     brick_hash = SpatialHash(width, height, 10, 10, brick_grid.get_bricks())
@@ -112,7 +112,7 @@ def handle_event(event):
         game_state_manager.handle_key(event.key, event.mod)
     elif event.type == pygame.MOUSEBUTTONDOWN:
         if game_state_manager.get_state() == GameState.INGAME:
-            ball.launch()
+            ball.launch(paddle)
 
 while True:
     screen.fill(Colors.BLACK)

@@ -21,19 +21,20 @@ class Ball(Entity):
     def __init__(self, pos, velocity, color, radius):
         Entity.__init__(self, pos)
         self.velocity = velocity
-        self.initial_velocity = velocity
+        self.initial_velocity = list(velocity)
         self.color = color
         self.radius = radius
         self.max_speed = 3
         self.launched = False
         self.rect = pygame.Rect(self.pos, (radius * 2, radius * 2))
 
-    def launch(self):
+    def launch(self, paddle):
+        self.apply_paddle_friction(paddle)
         self.launched = True
 
     def reset(self):
+        self.velocity = list(self.initial_velocity)
         self.launched = False
-        self.velocity = self.initial_velocity
 
     def move(self):
         self.pos[0] += self.velocity[0]
@@ -67,12 +68,15 @@ class Ball(Entity):
         else:
             return None
 
+    def apply_paddle_friction(self, paddle):
+        self.velocity[0] = clamp(self.velocity[0] + paddle.velocity_x * paddle.friction,
+                                 -1 * self.max_speed, self.max_speed)
+
     def check_paddle_collision(self, paddle):
         point = self.get_collision_point(paddle.get_rect())
 
         if point:
-            self.velocity[0] = clamp(self.velocity[0] + paddle.velocity_x * paddle.friction,
-                                     -1 * self.max_speed, self.max_speed)
+            self.apply_paddle_friction(paddle)
             self.bounce(point)
 
     def check_wall_collision(self, screen):
