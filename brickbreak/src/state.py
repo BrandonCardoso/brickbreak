@@ -3,7 +3,9 @@ class GameState():
     INGAME = 1
     PAUSED = 2
     GAMEOVER = 3
-    CLEARED = 4
+    NEXT_LEVEL = 4
+    GAME_WON = 5
+    QUIT_GAME = 6
 
 class GameStateRelation():
     def __init__(self, name, initial_state, end_state, key = None, mod = None, callback = None):

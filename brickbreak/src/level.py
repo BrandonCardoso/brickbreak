@@ -17,3 +17,6 @@ class LevelManager():
         level_str = str(level)
         if level_str in self.levels:
             return self.levels[level_str]
+
+    def level_exists(self, level):
+        return str(level) in self.levels

@@ -57,9 +57,13 @@ paused_text = ScreenText("PAUSED", "Consolas", 32, (width/2, height/2), True, Co
 game_over_text = ScreenText("GAME OVER", "Consolas", 48, (width/2, height/2), True, Colors.RED)
 reset_text = ScreenText("Press any key to restart", "Consolas", 12, (width/2, height/2 + 100), True, Colors.WHITE, Colors.NONE, False)
 
-### cleared/victory screen objects
-victory_text = ScreenText("CLEARED", "Consolas", 48, (width/2, height/2), True, Colors.BLUE)
-# reset_tex
+### next level screen objects
+next_level_text = ScreenText("CLEARED", "Consolas", 48, (width/2, height/2), True, Colors.BLUE)
+continue_text = ScreenText("Press any key to continue", "Consolas", 12, (width/2, height/2 + 100), True, Colors.WHITE, Colors.NONE, False)
+
+### game beat screen objects
+game_won_text = ScreenText("YOU WON!", "Consolas", 48, (width/2, height/2), True, Colors.GREEN)
+play_again_text = ScreenText("Play again? Y/N", "Consolas", 24, (width/2, height/2 + 100), True, Colors.WHITE, Colors.NONE, False)
 
 def run_title_screen():
     global dirty_rects
@@ -94,7 +98,10 @@ def run_game():
             game_state_manager.set_state(GameState.GAMEOVER)
 
     if len(brick_grid.get_bricks()) <= 0:
-        game_state_manager.set_state(GameState.CLEARED)
+        if level_manager.level_exists(current_level + 1):
+            game_state_manager.set_state(GameState.NEXT_LEVEL)
+        else:
+            game_state_manager.set_state(GameState.GAME_WON)
 
 def run_pause_screen():
     paused_text.draw(screen)
@@ -106,11 +113,17 @@ def run_game_over_screen():
     dirty_rects.extend([game_over_text.get_rect(),
                         reset_text.get_rect()])
 
-def run_victory_screen():
-    victory_text.draw(screen)
-    reset_text.draw(screen)
-    dirty_rects.extend([victory_text.get_rect(),
-                        reset_text.get_rect()])
+def run_next_level_screen():
+    next_level_text.draw(screen)
+    continue_text.draw(screen)
+    dirty_rects.extend([next_level_text.get_rect(),
+                        continue_text.get_rect()])
+
+def run_game_won_screen():
+    game_won_text.draw(screen)
+    play_again_text.draw(screen)
+    dirty_rects.extend([game_won_text.get_rect(),
+                        play_again_text.get_rect()])
 
 def unpause():
     clear_screen()
@@ -119,6 +132,8 @@ def unpause():
 def redraw_bricks():
     brick_grid.update(screen, True)
 
+def quit_game():
+    sys.exit()
 
 ### state
 game_state_manager = GameStateManager(GameState.TITLE)
@@ -141,13 +156,19 @@ game_state_manager.add_relation(GameStateRelation("Restart Game",
                                                   GameState.GAMEOVER, GameState.INGAME,
                                                   None, None, reset_game))
 game_state_manager.add_relation(GameStateRelation("Next Level",
-                                                  GameState.CLEARED, GameState.INGAME,
+                                                  GameState.NEXT_LEVEL, GameState.INGAME,
                                                   None, None, next_level))
+game_state_manager.add_relation(GameStateRelation("Restart Game",
+                                                  GameState.GAME_WON, GameState.TITLE,
+                                                  pygame.K_y, None, reset_game))
+game_state_manager.add_relation(GameStateRelation("Quit Game",
+                                                  GameState.GAME_WON, GameState.QUIT_GAME,
+                                                  pygame.K_n, None, quit_game))
 
 ### event handlers
 def handle_event(event):
     if event.type == pygame.QUIT:
-        sys.exit()
+        quit_game()
     elif event.type == pygame.KEYDOWN:
         game_state_manager.handle_key(event.key, event.mod)
     elif event.type == pygame.MOUSEBUTTONDOWN:
@@ -169,7 +190,9 @@ while True:
 
     game_state = game_state_manager.get_state()
 
-    if game_state == GameState.TITLE:
+    if game_state == GameState.QUIT_GAME:
+        quit_game()
+    elif game_state == GameState.TITLE:
         run_title_screen()
     elif game_state == GameState.INGAME:
         run_game()
@@ -177,8 +200,10 @@ while True:
         run_pause_screen()
     elif game_state == GameState.GAMEOVER:
         run_game_over_screen()
-    elif game_state == GameState.CLEARED:
-        run_victory_screen()
+    elif game_state == GameState.NEXT_LEVEL:
+        run_next_level_screen()
+    elif game_state == GameState.GAME_WON:
+        run_game_won_screen()
 
     if len(dirty_rects) > 0:
         pygame.display.update(dirty_rects)
