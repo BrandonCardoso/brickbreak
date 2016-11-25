@@ -137,7 +137,7 @@ game_state_manager.add_relation(GameStateRelation("Unpause Game",
                                                   pygame.K_p, None, unpause))
 game_state_manager.add_relation(GameStateRelation("Unpause Game",
                                                   GameState.PAUSED, GameState.INGAME,
-                                                  pygame.K_SPACE, None, clear_screen))
+                                                  pygame.K_SPACE, None, unpause))
 game_state_manager.add_relation(GameStateRelation("Restart Game",
                                                   GameState.GAMEOVER, GameState.INGAME,
                                                   None, None, reset_game))
