@@ -14,7 +14,6 @@ class LevelManager():
         self.levels = json.loads(data)
 
     def get_level_layout(self, level):
-        print(level)
         level_str = str(level)
         if level_str in self.levels:
             return self.levels[level_str]

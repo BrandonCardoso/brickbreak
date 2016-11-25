@@ -27,7 +27,7 @@ def set_level(level):
     ball = Ball([screen.get_width()/2 - ball_radius/2, screen.get_height()/2 - ball_radius/2], [0, -2], Colors.WHITE, ball_radius)
     paddle = Paddle([0, 550], [60, 8], Colors.WHITE)
     brick_grid = BrickGrid(level_manager.get_level_layout(current_level), [40, 40], screen.get_width() - 80, 200)
-    brick_hash = SpatialHash(width, height, 10, 10, brick_grid.get_bricks())
+    brick_hash = SpatialHash(width, height, 5, 5, brick_grid.get_bricks())
     clear_screen()
 
 def reset_game():
@@ -37,7 +37,6 @@ def reset_game():
     set_level(1)
 
 def next_level():
-    print('next level')
     global current_level
     set_level(current_level + 1)
 

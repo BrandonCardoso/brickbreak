@@ -182,6 +182,7 @@ class BrickGrid():
         self.width = width
         self.height = height
         self.pos = pos
+        self.brick_size = (self.width / self.cols, self.height / self.rows)
 
         for i in range(0, self.rows):
             for j in range(0, self.cols):
@@ -200,10 +201,9 @@ class BrickGrid():
         else:
             color = Colors.WHITE
             
-        return Brick([y * self.width / self.cols + self.pos[1]
-                      , x * self.height / self.rows + self.pos[0]],
-                    [self.width / self.cols, self.height / self.rows],
-                    color)
+        return Brick((y * self.width / self.cols + self.pos[1],
+                      x * self.height / self.rows + self.pos[0]),
+                     self.brick_size, color)
 
     def update(self, surface, force_redraw = False):
         self.bricks = filter(lambda x: not x.remove, self.bricks) # remove hit bricks
