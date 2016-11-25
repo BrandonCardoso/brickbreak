@@ -4,6 +4,7 @@ from src.entities import Ball, Paddle, Brick, BrickGrid
 from src.spatial import SpatialHash
 from src.misc import Colors, ScreenText
 from src.state import GameState, GameStateRelation, GameStateManager
+from src.level import LevelManager
 
 pygame.init()
 pygame.display.set_caption("Brick Break")
@@ -19,15 +20,26 @@ def clear_screen():
     screen.fill((0,0,0))
     dirty_rects.append(pygame.Rect(0, 0, width, height))
 
-def reset_game():
-    global ball, paddle, brick_grid, brick_hash, lives, lives_text
+def set_level(level):
+    global ball, paddle, brick_grid, brick_hash, lives, lives_text, current_level, level_text
+    current_level = level
+    level_text = ScreenText(str(current_level), "Consolars", 12, (width - 20, 5), False, Colors.WHITE, Colors.NONE, False)
     ball = Ball([screen.get_width()/2 - ball_radius/2, screen.get_height()/2 - ball_radius/2], [0, -2], Colors.WHITE, ball_radius)
     paddle = Paddle([0, 550], [60, 8], Colors.WHITE)
-    brick_grid = BrickGrid([40, 40], 8, 20, screen.get_width() - 80, 200)
+    brick_grid = BrickGrid(level_manager.get_level_layout(current_level), [40, 40], screen.get_width() - 80, 200)
     brick_hash = SpatialHash(width, height, 10, 10, brick_grid.get_bricks())
+    clear_screen()
+
+def reset_game():
+    global lives, lives_text
     lives = 3
     lives_text = ScreenText("Lives: " + str(lives), "Consolas", 12, (5, height - 12 - 5), False, Colors.WHITE, Colors.NONE, False)
-    clear_screen()
+    set_level(1)
+
+def next_level():
+    print('next level')
+    global current_level
+    set_level(current_level + 1)
 
 ### title screen objects
 title_text = ScreenText("BRICK BREAK", "Consolas", 48, (width/2, height/2), True, Colors.RED)
@@ -36,6 +48,7 @@ exit_title_text = ScreenText("Press any key to start", "Consolas", 12, (width/2,
 ### game objects
 fps_counter = ScreenText(0, "Consolas", 12, (5, 5), False, Colors.WHITE, Colors.NONE, False)
 ball_radius = 5
+level_manager = LevelManager("\src\levels.json")
 reset_game()
 
 ### pause screen objects
@@ -57,8 +70,10 @@ def run_title_screen():
                         exit_title_text.get_rect()])
 
 def run_game():
+    level_text.draw(screen)
     lives_text.draw(screen)
-    dirty_rects.append(lives_text.get_rect())
+    dirty_rects.extend([lives_text.get_rect(),
+                        level_text.get_rect()])
 
     dirty_rects.extend([paddle.get_rect(), ball.get_rect()])
     paddle.update(screen)
@@ -98,25 +113,37 @@ def run_victory_screen():
     dirty_rects.extend([victory_text.get_rect(),
                         reset_text.get_rect()])
 
+def unpause():
+    clear_screen()
+    redraw_bricks()
+
 def redraw_bricks():
     brick_grid.update(screen, True)
 
+
 ### state
 game_state_manager = GameStateManager(GameState.TITLE)
-game_state_manager.add_relation(GameStateRelation("Exit Title Screen", GameState.TITLE, GameState.INGAME))
-game_state_manager.add_relation(GameStateRelation("Pause Game", GameState.INGAME, GameState.PAUSED, pygame.K_p))
-game_state_manager.add_relation(GameStateRelation("Pause Game", GameState.INGAME, GameState.PAUSED, pygame.K_SPACE))
-game_state_manager.add_relation(GameStateRelation("Unpause Game", GameState.PAUSED, GameState.INGAME, pygame.K_p))
-game_state_manager.add_relation(GameStateRelation("Unpause Game", GameState.PAUSED, GameState.INGAME, pygame.K_SPACE))
-game_state_manager.add_relation(GameStateRelation("Restart Game", GameState.GAMEOVER, GameState.INGAME))
-game_state_manager.add_relation(GameStateRelation("Restart Game", GameState.CLEARED, GameState.INGAME))
-
-game_state_manager.add_enter_callback(GameState.INGAME, redraw_bricks)
-
-game_state_manager.add_exit_callback(GameState.TITLE, clear_screen)
-game_state_manager.add_exit_callback(GameState.PAUSED, clear_screen)
-game_state_manager.add_exit_callback(GameState.GAMEOVER, reset_game)
-game_state_manager.add_exit_callback(GameState.CLEARED, reset_game)
+game_state_manager.add_relation(GameStateRelation("Exit Title Screen",
+                                                  GameState.TITLE, GameState.INGAME,
+                                                  None, None, clear_screen))
+game_state_manager.add_relation(GameStateRelation("Pause Game",
+                                                  GameState.INGAME, GameState.PAUSED,
+                                                  pygame.K_p, None, clear_screen))
+game_state_manager.add_relation(GameStateRelation("Pause Game",
+                                                  GameState.INGAME, GameState.PAUSED,
+                                                  pygame.K_SPACE))
+game_state_manager.add_relation(GameStateRelation("Unpause Game",
+                                                  GameState.PAUSED, GameState.INGAME,
+                                                  pygame.K_p, None, unpause))
+game_state_manager.add_relation(GameStateRelation("Unpause Game",
+                                                  GameState.PAUSED, GameState.INGAME,
+                                                  pygame.K_SPACE, None, clear_screen))
+game_state_manager.add_relation(GameStateRelation("Restart Game",
+                                                  GameState.GAMEOVER, GameState.INGAME,
+                                                  None, None, reset_game))
+game_state_manager.add_relation(GameStateRelation("Next Level",
+                                                  GameState.CLEARED, GameState.INGAME,
+                                                  None, None, next_level))
 
 ### event handlers
 def handle_event(event):

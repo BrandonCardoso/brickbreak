@@ -153,14 +153,15 @@ class Brick(Entity):
         self.hit = False
         self.need_update = True
         self.remove = False
+        self.rect = pygame.Rect(pos, size)
 
     def was_hit(self):
         self.hit = True
         self.need_update = True
 
     def draw(self, surface):
-        pygame.draw.rect(surface, self.color, self.get_rect())
-        pygame.draw.rect(surface, self.border_color, self.get_rect(), 1)
+        pygame.draw.rect(surface, self.color, self.rect)
+        pygame.draw.rect(surface, self.border_color, self.rect, 1)
         #pygame.draw.rect(surface, (255, 0, 0), self.get_rect(), 1) # hitbox
 
     def update(self, surface, force_redraw = False):
@@ -174,13 +175,35 @@ class Brick(Entity):
             self.need_update = False
 
 class BrickGrid():
-    def __init__(self, pos, rows, cols, width, height):
+    def __init__(self, layout, pos, width, height):
         self.bricks = []
-        for i in range(0, rows):
-            for j in range(0, cols):            
-                self.bricks.append(Brick([j * width / cols + pos[1], i * height / rows + pos[0]],
-                    [width / cols, height / rows],
-                    Colors.WHITE))
+        self.rows = len(layout)
+        self.cols = len(layout[0])
+        self.width = width
+        self.height = height
+        self.pos = pos
+
+        for i in range(0, self.rows):
+            for j in range(0, self.cols):
+                brick = self.create_brick_from_layout(i, j, layout[i][j])
+
+                if brick:
+                    self.bricks.append(brick)
+
+    def create_brick_from_layout(self, x, y, letter):
+        ## empty/no brick
+        if letter == '_':
+            return None
+
+        if letter == 'b':
+            color = Colors.BLUE
+        else:
+            color = Colors.WHITE
+            
+        return Brick([y * self.width / self.cols + self.pos[1]
+                      , x * self.height / self.rows + self.pos[0]],
+                    [self.width / self.cols, self.height / self.rows],
+                    color)
 
     def update(self, surface, force_redraw = False):
         self.bricks = filter(lambda x: not x.remove, self.bricks) # remove hit bricks

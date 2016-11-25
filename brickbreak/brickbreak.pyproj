@@ -29,6 +29,9 @@
     <Compile Include="src\geometry\__init__.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="src\level.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="src\misc.py">
       <SubType>Code</SubType>
     </Compile>
@@ -45,6 +48,9 @@
   <ItemGroup>
     <Folder Include="src\" />
     <Folder Include="src\geometry\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="src\levels.json" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
